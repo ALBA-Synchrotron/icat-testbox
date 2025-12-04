@@ -1,0 +1,16 @@
+{
+  "databases": {
+    "mariadb": {
+      "image": "mariadb:10.6.24-jammy",
+      "port": 3306,
+      "env": {
+        "MARIADB_ALLOW_EMPTY_ROOT_PASSWORD": 1
+      }
+    }
+  },
+  "fixtures_mapping": {
+    "mariadb": {
+      "<= 6.1.1": "mariadb_icat_6_basic_fixtures.sql"
+    }
+  }
+}
