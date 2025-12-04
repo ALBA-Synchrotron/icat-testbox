@@ -44,11 +44,16 @@ class Config:
     def get_docker_client(self) -> docker.DockerClient:
         return docker.DockerClient(base_url=f"unix://{self.docker_socket_path}")
 
-    def get_fixtures_file(self, icat_version: str) -> str:
-        fixtures_opts: dict = self.fixtures_mapping[self.default_database]
+    def get_fixtures_file(self, component: str, component_version: str) -> str:
+        if self.default_database not in self.fixtures_mapping:
+            raise KeyError(f"fixtures_mapping for {self.default_database} not found")
+        if component not in self.fixtures_mapping[self.default_database]:
+            raise KeyError(f"fixtures_mapping for {component} not found")
+
+        fixtures_opts: dict = self.fixtures_mapping[self.default_database][component]
 
         for rule, value in fixtures_opts.items():
-            if version_matches(rule, icat_version):
+            if version_matches(rule, component_version):
                 return value
         return ""
 

@@ -1,0 +1,1 @@
+FROM registry.cells.es/docker/payara/server-full:6.2025.3-jdk21

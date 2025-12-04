@@ -3,7 +3,7 @@ import json
 from flask import Flask, Response, request
 
 from config import Config
-from databases import provision_new_icat_database
+from databases import provision_new_icat_databases
 from utils import before_start, random_identifier_generator
 
 config = Config()
@@ -20,19 +20,20 @@ def hello_world() -> Response:
 def provision_icat_testbox_instance() -> Response:
     try:
         req_data: dict = json.loads(request.data.decode())
-        load_fixtures: bool = req_data.get("load_fixtures", False)
+        init_database: bool = req_data.get("load_fixtures", True)
         icat_version: str = req_data.get("icat_version", "")
+        authn_db_version: str = req_data.get("authn_db_version", "")
 
-        if not icat_version:
-            return Response("icat_version is required", status=400)
+        if not icat_version or not authn_db_version:
+            return Response("icat_version and authn_db_version are required", status=400)
 
-        identifier = f"{config.icat_testbox_instance_name}_{random_identifier_generator()}"
-        provision_new_icat_database(config, identifier, icat_version, load_fixtures)
+        instance_identifier: str = random_identifier_generator()
+        provision_new_icat_databases(config, instance_identifier, init_database, icat_version, authn_db_version)
 
         ret: dict = {
-            "identifier": identifier
+            "identifier": instance_identifier
         }
 
-        return Response(json.dumps(ret), status=200)
+        return Response(json.dumps(ret), status=200, content_type="application/json")
     except Exception as e:
         return Response(str(e), status=500)

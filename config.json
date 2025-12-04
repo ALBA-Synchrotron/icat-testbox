@@ -10,7 +10,12 @@
   },
   "fixtures_mapping": {
     "mariadb": {
-      "<= 6.1.1": "mariadb_icat_6_basic_fixtures.sql"
+      "icat_server": {
+        "<= 6.1.1": "mariadb_icat_6_basic_fixtures.sql"
+      },
+      "authn_db": {
+        "<= 3.0.0": "mariadb_icat_authn_db_3_.sql"
+      }
     }
   }
 }
