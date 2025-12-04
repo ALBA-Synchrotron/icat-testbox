@@ -60,7 +60,8 @@ def load_db_fixtures(config: Config, db_container: Container, fixtures_file_path
         case _:
             raise ValueError("Invalid database type")
     db_container.exec_run(commands)
-    db_container.exec_run([f"rm -f /tmp/fixtures_{db_schema}.sql"])
+    db_container.exec_run(["rm", f"/tmp/fixtures_{db_schema}.sql"])
+
 
 def create_db_schema_commands(db_type: str, db_names: list) -> list:
     match db_type:
