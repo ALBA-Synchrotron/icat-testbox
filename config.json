@@ -5,7 +5,14 @@
       "port": 3306,
       "env": {
         "MARIADB_ALLOW_EMPTY_ROOT_PASSWORD": 1
-      }
+      },
+      "jar_client": "https://misdockerprod02.cells.es/nexus/repository/icat-alba/org/icatproject/mariadb-java-client/3.5.2/mariadb-java-client-3.5.2.jar"
+    }
+  },
+  "payara_images": {
+    "icat_server <= 6.1.1|authn_db <= 3.0.0": {
+      "image": "t",
+      "port": 8080
     }
   },
   "fixtures_mapping": {

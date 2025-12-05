@@ -8,7 +8,7 @@ from config import Config
 
 
 def provision_new_icat_databases(config: Config, identifier: str, init_database: bool, icat_version: str,
-                                 authn_db_version: str) -> None:
+                                 authn_db_version: str) -> tuple[str, str]:
     icat_server_schema_name: str = f"icat_server_{identifier}"
     icat_authn_db_schema_name: str = f"icat_authn_db_{identifier}"
     dbs_to_create: list = [icat_server_schema_name, icat_authn_db_schema_name]
@@ -31,7 +31,7 @@ def provision_new_icat_databases(config: Config, identifier: str, init_database:
 
             print(f"Loading authn db data from {authn_fixtures_file}")
             load_db_fixtures(config, db_container, authn_fixtures_file, icat_authn_db_schema_name)
-
+        return icat_server_schema_name, icat_authn_db_schema_name
     except Exception as e:
         print(f"Error provisioning database: {e}")
 

@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import re
 
 import docker
@@ -12,6 +13,7 @@ class Config:
     database_port: int
     default_database: str
     docker_socket_path: str
+    containers_port_range: str
 
     def __init__(self) -> None:
         self.icat_testbox_instance_name = os.getenv("ICAT_TESTBOX_INSTANCE_NAME", "icat_testbox_0")
@@ -19,6 +21,7 @@ class Config:
         self.database_port = int(os.getenv("DATABASE_PORT", "33306"))
         self.default_database = os.getenv("DEFAULT_DATABASE", "mariadb")
         self.docker_socket_path = os.getenv("DOCKER_SOCKET_PATH", "/var/run/docker.sock")
+        self.containers_port_range = os.getenv("CONTAINERS_PORT_RANGE", "50000-55000")
 
         self.__load_config_file()
 
@@ -41,6 +44,10 @@ class Config:
             raise KeyError("fixtures key not found in config file")
         self.fixtures_mapping = config["fixtures_mapping"]
 
+        if "payara_images" not in config:
+            raise KeyError("payara_images key not found in config file")
+        self.payara_images = config["payara_images"]
+
     def get_docker_client(self) -> docker.DockerClient:
         return docker.DockerClient(base_url=f"unix://{self.docker_socket_path}")
 
@@ -56,6 +63,34 @@ class Config:
             if version_matches(rule, component_version):
                 return value
         return ""
+
+    def get_payara_image(self, component_versions: dict) -> tuple[str, int]:
+        for component_version_str, image_config in self.payara_images.items():
+            components: list = component_version_str.split("|")
+            versions = [i.split(" ") for i in components if len(i.split(" ")) == 3]
+
+            if all(version_matches(f"{i[1]} {i[2]}", component_versions[i[0]]) for i in versions):
+                return image_config["image"], image_config["port"]
+        raise ValueError("No matching image found for the requested versions")
+
+    def get_db_jar_client(self, db_type: str = "") -> str:
+        if db_type and db_type in self.databases:
+            return self.databases[db_type]["jar_client"]
+        return self.databases[self.default_database]["jar_client"]
+
+    def get_available_port(self, feeling_lucky: bool = False) -> int:
+        if feeling_lucky:
+            return random.randint(20000, 65000)
+
+        low, high = self.containers_port_range.split("-")
+        dc: docker.DockerClient = self.get_docker_client()
+        running_test_boxes = [i.labels for i in dc.containers.list(
+            filters={"label":  ["type=icat-testbox"]}) if isinstance(i.labels, dict)]
+        busy_ports = [int(i["host_port"]) for i in running_test_boxes if "host_port" in i]
+
+        print(f"Busy ports (accepted range {low}-{high}): {busy_ports}")
+
+        return next(i for i in range(int(low), int(high)) if i not in busy_ports)
 
 
 def version_matches(rule, version):

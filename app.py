@@ -3,6 +3,7 @@ import json
 from flask import Flask, Response, request
 
 from config import Config
+from containers import provision_new_icat_testbox
 from databases import provision_new_icat_databases
 from utils import before_start, random_identifier_generator
 
@@ -28,12 +29,11 @@ def provision_icat_testbox_instance() -> Response:
             return Response("icat_version and authn_db_version are required", status=400)
 
         instance_identifier: str = random_identifier_generator()
-        provision_new_icat_databases(config, instance_identifier, init_database, icat_version, authn_db_version)
-
-        ret: dict = {
-            "identifier": instance_identifier
-        }
-
+        icat_server_schema_name, icat_authn_db_schema_name = provision_new_icat_databases(config, instance_identifier,
+                                                                                          init_database, icat_version,
+                                                                                          authn_db_version)
+        ret: dict = provision_new_icat_testbox(config, instance_identifier, icat_version, authn_db_version, icat_server_schema_name,
+                                   icat_authn_db_schema_name)
         return Response(json.dumps(ret), status=200, content_type="application/json")
     except Exception as e:
         return Response(str(e), status=500)
