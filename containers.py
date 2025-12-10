@@ -28,13 +28,17 @@ def provision_new_icat_testbox(config: Config, identifier: str, icat_version: st
     try:
         payara_image, payara_port = config.get_payara_image({"icat_server": icat_version, "authn_db": authn_db_version})
 
+        db_user, db_password = config.get_default_db_credentials()
+
         environment_vars: list = [
-            f"DB_JAR_CLIENT={config.get_db_jar_client()}"
+            f"DB_JAR_CLIENT={config.get_db_jar_client()}",
             f"ICAT_SERVER_VERSION={icat_version}",
             f"ICAT_AUTHN_DB_VERSION={authn_db_version}",
             f"DB_TYPE={config.default_database}",
-            f"DB_HOSTNAME={config.icat_testbox_instance_name}_db",
+            f"DB_HOSTNAME={config.host_db_name}",
             f"DB_HOST_PORT={config.database_port}",
+            f"DB_USER={db_user}",
+            f"DB_PASSWORD={db_password}",
             f"ICAT_SERVER_DB_SCHEMA_NAME={icat_server_schema_name}",
             f"ICAT_AUTHN_DB_SCHEMA_NAME={icat_authn_db_schema_name}"
         ]
@@ -43,7 +47,7 @@ def provision_new_icat_testbox(config: Config, identifier: str, icat_version: st
         print(f"Free host port found: {host_port}")
 
         container_labels: dict = {
-            "owner": config.icat_testbox_instance_name,
+            "provisioner": config.icat_testbox_instance_name,
             "type": "icat-testbox",
             "identifier": identifier,
             "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

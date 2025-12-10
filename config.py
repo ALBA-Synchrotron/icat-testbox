@@ -12,6 +12,7 @@ class Config:
     config_file_path: str
     database_port: int
     default_database: str
+    host_db_name: str
     docker_socket_path: str
     containers_port_range: str
 
@@ -19,6 +20,7 @@ class Config:
         self.icat_testbox_instance_name = os.getenv("ICAT_TESTBOX_INSTANCE_NAME", "icat_testbox_0")
         self.config_file_path = os.getenv("CONFIG_FILE_PATH", "config.json")
         self.database_port = int(os.getenv("DATABASE_PORT", "33306"))
+        self.host_db_name = os.getenv("HOST_DB_NAME", "icat_db")
         self.default_database = os.getenv("DEFAULT_DATABASE", "mariadb")
         self.docker_socket_path = os.getenv("DOCKER_SOCKET_PATH", "/var/run/docker.sock")
         self.containers_port_range = os.getenv("CONTAINERS_PORT_RANGE", "50000-55000")
@@ -77,6 +79,11 @@ class Config:
         if db_type and db_type in self.databases:
             return self.databases[db_type]["jar_client"]
         return self.databases[self.default_database]["jar_client"]
+
+    def get_default_db_credentials(self, db_type: str = "") -> tuple[str, str]:
+        if db_type and db_type in self.databases:
+            return self.databases[db_type]["user"], self.databases[db_type]["password"]
+        return self.databases[self.default_database]["user"], self.databases[self.default_database]["password"]
 
     def get_available_port(self, feeling_lucky: bool = False) -> int:
         if feeling_lucky:

@@ -76,6 +76,17 @@ def create_db_schema_commands(db_type: str, db_names: list) -> list:
             raise ValueError("Invalid database type")
 
 
+def db_user_permissions_commands(db_type: str, username: str, password: str) -> list:
+    match db_type:
+        case "mariadb":
+            return [
+                "mariadb", "-e",
+                f"CREATE USER '{username}'@'%' IDENTIFIED BY '{password}'; GRANT ALL PRIVILEGES ON *.* TO '{username}'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+            ]
+        case _:
+            raise ValueError("Invalid database type")
+
+
 def drop_db_schema_commands(db_type: str, db_names: list) -> list:
     match db_type:
         case "mariadb":

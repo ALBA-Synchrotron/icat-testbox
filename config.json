@@ -6,7 +6,9 @@
       "env": {
         "MARIADB_ALLOW_EMPTY_ROOT_PASSWORD": 1
       },
-      "jar_client": "https://misdockerprod02.cells.es/nexus/repository/icat-alba/org/icatproject/mariadb-java-client/3.5.2/mariadb-java-client-3.5.2.jar"
+      "jar_client": "https://misdockerprod02.cells.es/nexus/repository/icat-alba/org/icatproject/mariadb-java-client/3.5.2/mariadb-java-client-3.5.2.jar",
+      "user": "dummyUser",
+      "password": "dummyPassword"
     }
   },
   "payara_images": {
