@@ -1,13 +1,14 @@
 import json
+from json import JSONDecodeError
 
 from flask import Flask, Response, request
 
 from config import Config
-from containers import provision_new_icat_testbox
+from containers import provision_new_icat_testbox, get_current_icat_testboxes, delete_icat_testbox
 from databases import provision_new_icat_databases
 from utils import before_start, random_identifier_generator
 
-config = Config()
+config: Config = Config()
 before_start(config)
 app: Flask = Flask(__name__)
 
@@ -17,7 +18,7 @@ def hello_world() -> Response:
     return Response("<p>Hello, World!</p>", status=200)
 
 
-@app.route("/new_icat_testbox_instance", methods=["POST"])
+@app.route("/testbox", methods=["POST"])
 def provision_icat_testbox_instance() -> Response:
     try:
         req_data: dict = json.loads(request.data.decode())
@@ -32,8 +33,24 @@ def provision_icat_testbox_instance() -> Response:
         icat_server_schema_name, icat_authn_db_schema_name = provision_new_icat_databases(config, instance_identifier,
                                                                                           init_database, icat_version,
                                                                                           authn_db_version)
-        ret: dict = provision_new_icat_testbox(config, instance_identifier, icat_version, authn_db_version, icat_server_schema_name,
-                                   icat_authn_db_schema_name)
+        ret: dict = provision_new_icat_testbox(config, instance_identifier, icat_version, authn_db_version,
+                                               icat_server_schema_name,
+                                               icat_authn_db_schema_name)
         return Response(json.dumps(ret), status=200, content_type="application/json")
-    except Exception as e:
-        return Response(str(e), status=500)
+    except JSONDecodeError as e:
+        return Response(str(e), status=400)
+
+
+@app.route("/testbox", methods=["GET"])
+def list_icat_testboxes() -> Response:
+    containers: list = get_current_icat_testboxes(config)
+    ret: list = [{**i.labels, "status": i.status, "container_id": i.id, "container_name": i.name} for i in containers]
+    return Response(json.dumps(ret), status=200, content_type="application/json")
+
+
+@app.route("/testbox/<identifier>", methods=["DELETE"])
+def delete_testbox(identifier: str) -> Response:
+    deleted: bool = delete_icat_testbox(config, identifier)
+    if not deleted:
+        return Response("Testbox not found", status=404)
+    return Response(json.dumps({"msg": f"Testbox {identifier} deleted successfully"}), status=200, content_type="application/json")

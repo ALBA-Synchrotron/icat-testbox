@@ -2,6 +2,7 @@ import json
 import os
 import random
 import re
+from json import JSONDecodeError
 
 import docker
 from packaging.version import Version
@@ -32,8 +33,11 @@ class Config:
         if not os.path.exists(self.config_file_path):
             raise FileNotFoundError(f"Config file not found at {self.config_file_path}")
 
-        with open(self.config_file_path, "r") as f:
-            config = json.load(f)
+        try:
+            with open(self.config_file_path, "r") as f:
+                config = json.load(f)
+        except (OSError, JSONDecodeError) as e:
+            raise OSError(f"Error reading config file: {e}")
 
         if not config:
             raise ValueError("Config file is empty")
@@ -92,7 +96,7 @@ class Config:
         low, high = self.containers_port_range.split("-")
         dc: docker.DockerClient = self.get_docker_client()
         running_test_boxes = [i.labels for i in dc.containers.list(
-            filters={"label":  ["type=icat-testbox"]}) if isinstance(i.labels, dict)]
+            filters={"label": ["type=icat-testbox"]}) if isinstance(i.labels, dict)]
         busy_ports = [int(i["host_port"]) for i in running_test_boxes if "host_port" in i]
 
         print(f"Busy ports (accepted range {low}-{high}): {busy_ports}")

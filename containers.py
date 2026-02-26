@@ -1,9 +1,12 @@
 import datetime
 
 import docker
+from docker import DockerClient
+from docker.errors import APIError, ImageNotFound, ContainerError, NotFound
 from docker.models.containers import Container
 
 from config import Config
+from databases import drop_icat_databases
 
 
 def provision_database_container(config: Config) -> Container:
@@ -18,8 +21,11 @@ def provision_database_container(config: Config) -> Container:
 
     if not image or not db_port:
         raise ValueError("Invalid database configuration")
-    return dc.containers.run(image=image, name=f"{config.icat_testbox_instance_name}_db", detach=True,
-                             ports={f"{db_port}/tcp": host_port}, environment=container_env)
+    try:
+        return dc.containers.run(image=image, name=f"{config.icat_testbox_instance_name}_db", detach=True,
+                                 ports={f"{db_port}/tcp": host_port}, environment=container_env)
+    except (ContainerError, ImageNotFound, APIError) as e:
+        raise RuntimeError(f"Failed to provision database container: {e}")
 
 
 def provision_new_icat_testbox(config: Config, identifier: str, icat_version: str, authn_db_version: str,
@@ -61,5 +67,28 @@ def provision_new_icat_testbox(config: Config, identifier: str, icat_version: st
                                                  ports={f"{payara_port}/tcp": host_port})
         print(f"New icat testbox provisioned successfully, container id: {container.id} name: {container.name}")
         return {**container_labels, "container_id": container.id, "container_name": container.name}
-    except Exception as e:
-        print(f"Error provisioning new icat testbox: {e}")
+    except (ContainerError, ImageNotFound, APIError) as e:
+        raise RuntimeError(f"Failed to provision new icat testbox: {e}")
+
+
+def get_current_icat_testboxes(config: Config) -> list:
+    dc: DockerClient = config.get_docker_client()
+    try:
+        return dc.containers.list(all=True,
+                                  filters={"label": ["type=icat-testbox",
+                                                     f"provisioner={config.icat_testbox_instance_name}"]})
+    except APIError as e:
+        print(f"Error getting current icat testboxes: {e}")
+        return []
+
+
+def delete_icat_testbox(config: Config, identifier: str) -> bool:
+    dc: DockerClient = config.get_docker_client()
+    try:
+        drop_icat_databases(config, identifier)
+        container: Container = dc.containers.get(f"icat-test-box_{identifier}")
+        container.remove(force=True, v=True)
+        return True
+    except (APIError, NotFound) as e:
+        print(f"Error getting current icat testboxes: {e}")
+        return False

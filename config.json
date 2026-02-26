@@ -12,7 +12,7 @@
     }
   },
   "payara_images": {
-    "icat_server <= 6.1.1|authn_db <= 3.0.0": {
+    "icat_server <= 6.2.0|authn_db <= 3.0.0": {
       "image": "t",
       "port": 8080
     }
@@ -20,7 +20,7 @@
   "fixtures_mapping": {
     "mariadb": {
       "icat_server": {
-        "<= 6.1.1": "mariadb_icat_6_basic_fixtures.sql"
+        "<= 6.2.0": "mariadb_icat_6_basic_fixtures.sql"
       },
       "authn_db": {
         "<= 3.0.0": "mariadb_icat_authn_db_3_.sql"
