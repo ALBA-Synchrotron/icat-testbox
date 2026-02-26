@@ -3,6 +3,7 @@ from json import JSONDecodeError
 
 from flask import Flask, Response, request
 
+from auth import require_token
 from config import Config
 from containers import provision_new_icat_testbox, get_current_icat_testboxes, delete_icat_testbox
 from databases import provision_new_icat_databases
@@ -19,6 +20,7 @@ def hello_world() -> Response:
 
 
 @app.route("/testbox", methods=["POST"])
+@require_token(config)
 def provision_icat_testbox_instance() -> Response:
     try:
         req_data: dict = json.loads(request.data.decode())
@@ -42,6 +44,7 @@ def provision_icat_testbox_instance() -> Response:
 
 
 @app.route("/testbox", methods=["GET"])
+@require_token(config)
 def list_icat_testboxes() -> Response:
     containers: list = get_current_icat_testboxes(config)
     ret: list = [{**i.labels, "status": i.status, "container_id": i.id, "container_name": i.name} for i in containers]
@@ -49,6 +52,7 @@ def list_icat_testboxes() -> Response:
 
 
 @app.route("/testbox/<identifier>", methods=["DELETE"])
+@require_token(config)
 def delete_testbox(identifier: str) -> Response:
     deleted: bool = delete_icat_testbox(config, identifier)
     if not deleted:

@@ -16,6 +16,7 @@ class Config:
     host_db_name: str
     docker_socket_path: str
     containers_port_range: str
+    access_token: str | None
 
     def __init__(self) -> None:
         self.icat_testbox_instance_name = os.getenv("ICAT_TESTBOX_INSTANCE_NAME", "icat_testbox_0")
@@ -25,6 +26,7 @@ class Config:
         self.default_database = os.getenv("DEFAULT_DATABASE", "mariadb")
         self.docker_socket_path = os.getenv("DOCKER_SOCKET_PATH", "/var/run/docker.sock")
         self.containers_port_range = os.getenv("CONTAINERS_PORT_RANGE", "50000-55000")
+        self.access_token = os.getenv("ACCESS_TOKEN", None)
 
         self.__load_config_file()
 
