@@ -1,4 +1,5 @@
 import json
+import logging
 from json import JSONDecodeError
 
 from flask import Flask, Response, request, Blueprint
@@ -75,6 +76,9 @@ def delete_testbox(identifier: str) -> Response:
 def create_app() -> Flask:
     flask_app: Flask = Flask(__name__)
     flask_app.register_blueprint(bp)
+
+    flask_app.logger.debug("DEBUG visible?")
+    logging.getLogger(__name__).debug("ROOT visible?")
     return flask_app
 
 

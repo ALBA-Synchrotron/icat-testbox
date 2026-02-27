@@ -23,6 +23,7 @@ class Config:
     scheduler_enabled: bool
     clean_job_timer: int
     max_instance_lifetime: int
+    log_level: str
 
     def __init__(self) -> None:
         self.icat_testbox_instance_name = os.getenv("ICAT_TESTBOX_INSTANCE_NAME", "icat_testbox_0")
@@ -36,6 +37,7 @@ class Config:
         self.scheduler_enabled = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"
         self.clean_job_timer = int(os.getenv("SCHEDULER_CLEAN_TIMER", 20))
         self.max_instance_lifetime = int(os.getenv("MAX_INSTANCE_LIFETIME", 30))
+        self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
         self.__load_config_file()
 

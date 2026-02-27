@@ -16,6 +16,12 @@ logger: logging.Logger = logging.getLogger(__name__)
 
 
 def before_start(config: Config) -> None:
+    logging.basicConfig(
+        level=logging.getLevelName(config.log_level),
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+        force=True,
+    )
+
     logger.info("Starting server...")
     dc: DockerClient = config.get_docker_client()
 
