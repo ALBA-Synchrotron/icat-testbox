@@ -5,7 +5,7 @@ import re
 from json import JSONDecodeError
 
 import docker
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 
 
 class Config:
@@ -64,6 +64,16 @@ class Config:
 
     def get_docker_client(self) -> docker.DockerClient:
         return docker.DockerClient(base_url=f"unix://{self.docker_socket_path}")
+
+    def component_versions_supported(self, component_versions: dict) -> bool:
+        ret: list = []
+        for component, version in component_versions.items():
+            try:
+                _ = self.get_fixtures_file(component, version)
+                ret.append(True)
+            except InvalidVersion:
+                ret.append(False)
+        return all(ret)
 
     def get_fixtures_file(self, component: str, component_version: str) -> str:
         if self.default_database not in self.fixtures_mapping:

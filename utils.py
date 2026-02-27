@@ -1,4 +1,5 @@
 import datetime
+import os
 import secrets
 import string
 
@@ -55,7 +56,7 @@ def clear_expired_testboxes(config: Config) -> None:
 
 def init_scheduler(config: Config) -> BackgroundScheduler | None:
     ret = None
-    if config.scheduler_enabled:
+    if config.scheduler_enabled and "PYTEST_CURRENT_TEST" not in os.environ:
         ret = BackgroundScheduler()
         ret.add_job(clear_expired_testboxes, 'interval', seconds=10, kwargs={"config": config})
         ret.start()
