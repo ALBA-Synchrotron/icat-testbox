@@ -3,12 +3,12 @@ from json import JSONDecodeError
 
 from flask import Flask, Response, request, Blueprint
 
+import messages as msg
 from auth import require_token
 from config import Config
 from containers import provision_new_icat_testbox, get_current_icat_testboxes, delete_icat_testbox
 from databases import provision_new_icat_databases
 from utils import before_start, random_identifier_generator, init_scheduler
-import messages as msg
 
 bp = Blueprint('app', __name__)
 

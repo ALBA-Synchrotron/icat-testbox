@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import docker
 from docker import DockerClient
@@ -8,6 +9,7 @@ from docker.models.containers import Container
 from config import Config
 from databases import drop_icat_databases
 
+logger: logging.Logger = logging.getLogger(__name__)
 
 def provision_database_container(config: Config) -> Container:
     dc: docker.DockerClient = config.get_docker_client()
@@ -50,7 +52,7 @@ def provision_new_icat_testbox(config: Config, identifier: str, icat_version: st
         ]
 
         host_port: int = config.get_available_port()
-        print(f"Free host port found: {host_port}")
+        logger.info(f"Free host port found: {host_port}")
 
         container_labels: dict = {
             "provisioner": config.icat_testbox_instance_name,
@@ -65,7 +67,7 @@ def provision_new_icat_testbox(config: Config, identifier: str, icat_version: st
         container: Container = dc.containers.run(image=payara_image, name=f"icat-test-box_{identifier}", detach=True,
                                                  environment=environment_vars, labels=container_labels,
                                                  ports={f"{payara_port}/tcp": host_port})
-        print(f"New icat testbox provisioned successfully, container id: {container.id} name: {container.name}")
+        logger.info(f"New icat testbox provisioned successfully, container id: {container.id} name: {container.name}")
         return {**container_labels, "container_id": container.id, "container_name": container.name}
     except (ContainerError, ImageNotFound, APIError) as e:
         raise RuntimeError(f"Failed to provision new icat testbox: {e}")
@@ -78,7 +80,7 @@ def get_current_icat_testboxes(config: Config) -> list:
                                   filters={"label": ["type=icat-testbox",
                                                      f"provisioner={config.icat_testbox_instance_name}"]})
     except APIError as e:
-        print(f"Error getting current icat testboxes: {e}")
+        logger.error(f"Error getting current icat testboxes: {e}")
         return []
 
 
@@ -90,5 +92,5 @@ def delete_icat_testbox(config: Config, identifier: str) -> bool:
         container.remove(force=True, v=True)
         return True
     except (APIError, NotFound) as e:
-        print(f"Error getting current icat testboxes: {e}")
+        logger.error(f"Error getting current icat testboxes: {e}")
         return False

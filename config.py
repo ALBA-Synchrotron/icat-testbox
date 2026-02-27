@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 import re
@@ -7,6 +8,8 @@ from json import JSONDecodeError
 import docker
 from packaging.version import Version, InvalidVersion
 
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 class Config:
     icat_testbox_instance_name: str
@@ -117,7 +120,7 @@ class Config:
             filters={"label": ["type=icat-testbox"]}) if isinstance(i.labels, dict)]
         busy_ports = [int(i["host_port"]) for i in running_test_boxes if "host_port" in i]
 
-        print(f"Busy ports (accepted range {low}-{high}): {busy_ports}")
+        logger.info(f"Busy ports (accepted range {low}-{high}): {busy_ports}")
 
         return next(i for i in range(int(low), int(high)) if i not in busy_ports)
 

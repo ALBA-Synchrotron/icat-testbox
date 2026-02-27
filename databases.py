@@ -1,4 +1,5 @@
 import io
+import logging
 import os.path
 import sys
 import tarfile
@@ -9,6 +10,8 @@ from docker.errors import APIError, NotFound
 from docker.models.containers import Container
 
 from config import Config
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 def get_db_names(identifier: str) -> tuple[str, str]:
@@ -32,22 +35,22 @@ def provision_new_icat_databases(config: Config, identifier: str, init_database:
         if exit_code != 0:
             raise Exception(f"Database provisioning failed with exit code {exit_code}")
 
-        print(f"Databases provisioned successfully, db_names are {dbs_to_create}")
+        logger.info(f"Databases provisioned successfully, db_names are {dbs_to_create}")
         if init_database:
-            print("Initializing database with basic data...")
+            logger.info("Initializing database with basic data...")
             server_fixtures_file = config.get_fixtures_file("icat_server", icat_version)
             authn_fixtures_file = config.get_fixtures_file("authn_db", authn_db_version)
 
-            print(f"Loading server db data from {server_fixtures_file}")
+            logger.info(f"Loading server db data from {server_fixtures_file}")
             load_db_fixtures(config, db_container, server_fixtures_file, icat_server_schema_name)
 
-            print(f"Loading authn db data from {authn_fixtures_file}")
+            logger.info(f"Loading authn db data from {authn_fixtures_file}")
             load_db_fixtures(config, db_container, authn_fixtures_file, icat_authn_db_schema_name)
         return icat_server_schema_name, icat_authn_db_schema_name
     except NotFound as e:
         sys.exit(f"Database container not found: {e}")
     except APIError as e:
-        print(f"Error provisioning database: {e}")
+        logger.error(f"Error provisioning database: {e}")
 
 
 def load_db_fixtures(config: Config, db_container: Container, fixtures_file_path: str, db_schema: str) -> None:

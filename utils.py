@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import secrets
 import string
@@ -11,25 +12,27 @@ from config import Config
 from containers import provision_database_container, get_current_icat_testboxes, delete_icat_testbox
 from databases import db_user_permissions_commands
 
+logger: logging.Logger = logging.getLogger(__name__)
+
 
 def before_start(config: Config) -> None:
-    print("Starting server...")
+    logger.info("Starting server...")
     dc: DockerClient = config.get_docker_client()
 
     try:
         db_container = dc.containers.get(f"{config.icat_testbox_instance_name}_db")
-        print(f"Database container status: {db_container.status}")
+        logger.info(f"Database container status: {db_container.status}")
         if db_container.status != "running":
-            print("Database container is not running. Starting database container...")
+            logger.info("Database container is not running. Starting database container...")
             db_container.start()
     except NotFound:
-        print("Database container not found. Provisioning new database container...")
+        logger.error("Database container not found. Provisioning new database container...")
         db_container = provision_database_container(config)
         db_username, db_password = config.get_default_db_credentials()
         db_perm_commands: list = db_user_permissions_commands(config.default_database, db_username, db_password)
         ret, _ = db_container.exec_run(db_perm_commands)
 
-        print(f"Database container status: {db_container.status}")
+        logger.info(f"Database container status: {db_container.status}")
 
     except APIError as e:
         raise RuntimeError(f"Error interacting with Docker API: {e}")
@@ -51,7 +54,7 @@ def clear_expired_testboxes(config: Config) -> None:
             created_at: datetime.datetime = datetime.datetime.strptime(created_at, "%d-%m-%Y %H:%M:%S")
             if created_at + datetime.timedelta(minutes=config.max_instance_lifetime) > current_time:
                 delete_icat_testbox(config, identifier)
-                print(f"Deleted expired testbox {identifier}")
+                logger.info(f"Deleted expired testbox {identifier}")
 
 
 def init_scheduler(config: Config) -> BackgroundScheduler | None:
