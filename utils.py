@@ -1,11 +1,13 @@
+import datetime
 import secrets
 import string
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from docker import DockerClient
 from docker.errors import APIError, NotFound
 
 from config import Config
-from containers import provision_database_container
+from containers import provision_database_container, get_current_icat_testboxes, delete_icat_testbox
 from databases import db_user_permissions_commands
 
 
@@ -13,7 +15,6 @@ def before_start(config: Config) -> None:
     print("Starting server...")
     dc: DockerClient = config.get_docker_client()
 
-    db_container = None
     try:
         db_container = dc.containers.get(f"{config.icat_testbox_instance_name}_db")
         print(f"Database container status: {db_container.status}")
@@ -36,3 +37,26 @@ def before_start(config: Config) -> None:
 def random_identifier_generator(length: int = 7) -> str:
     alphabet: str = string.ascii_lowercase + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def clear_expired_testboxes(config: Config) -> None:
+    containers: list = get_current_icat_testboxes(config)
+    current_time: datetime.datetime = datetime.datetime.now()
+    for i in containers:
+        created_at: str = i.labels.get("creation_date", None)
+        identifier: str = i.labels.get("identifier", None)
+
+        if created_at and identifier:
+            created_at: datetime.datetime = datetime.datetime.strptime(created_at, "%d-%m-%Y %H:%M:%S")
+            if created_at + datetime.timedelta(minutes=config.max_instance_lifetime) > current_time:
+                delete_icat_testbox(config, identifier)
+                print(f"Deleted expired testbox {identifier}")
+
+
+def init_scheduler(config: Config) -> BackgroundScheduler | None:
+    ret = None
+    if config.scheduler_enabled:
+        ret = BackgroundScheduler()
+        ret.add_job(clear_expired_testboxes, 'interval', seconds=10, kwargs={"config": config})
+        ret.start()
+    return ret

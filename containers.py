@@ -56,7 +56,7 @@ def provision_new_icat_testbox(config: Config, identifier: str, icat_version: st
             "provisioner": config.icat_testbox_instance_name,
             "type": "icat-testbox",
             "identifier": identifier,
-            "creation_date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "creation_date": datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
             "icat_version": icat_version,
             "authn_db_version": authn_db_version,
             "host_port": str(host_port)

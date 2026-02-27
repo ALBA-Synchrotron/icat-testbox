@@ -7,11 +7,13 @@ from auth import require_token
 from config import Config
 from containers import provision_new_icat_testbox, get_current_icat_testboxes, delete_icat_testbox
 from databases import provision_new_icat_databases
-from utils import before_start, random_identifier_generator
+from utils import before_start, random_identifier_generator, init_scheduler
 
 config: Config = Config()
 before_start(config)
 app: Flask = Flask(__name__)
+
+scheduler = init_scheduler(config)
 
 
 @app.route("/", methods=["GET"])
