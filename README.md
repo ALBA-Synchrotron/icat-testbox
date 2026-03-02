@@ -6,7 +6,7 @@ publication.
 
 More information on ICAT can be found [here](https://icatproject.org/).
 <p align="center">
-<img src="https://public.cells.es/cdn/public/icat/icat-logo.png" alt="icat collaboration logo" width="200">
+<img src="https://public.cells.es/cdn/public/icat/icat-logo.png" alt="icat collaboration logo " width="200">
 </p>
 
 ## Introduction
@@ -153,4 +153,5 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not,
+
 see <https://www.gnu.org/licenses/>.
