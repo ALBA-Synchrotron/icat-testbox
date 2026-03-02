@@ -1,0 +1,6 @@
+STATUS_OK: str = "Up and running"
+ERR_INVALID_PAYLOAD: str = "Invalid payload"
+ERR_MISSING_VERSIONS: str = "icat_version and authn_db_version are required"
+ERR_INVALID_VERSIONS: str = "Given icat_version or authn_db_version are not supported by current config"
+ERR_NOT_FOUND: str = "Testbox instance not found"
+TESTBOX_DELETED: str = "Testbox instance deleted successfully"
