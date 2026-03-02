@@ -8,6 +8,9 @@ More information on ICAT can be found [here](https://icatproject.org/).
 <p align="center">
 <img src="https://public.cells.es/cdn/public/icat/icat-logo.png" alt="icat collaboration logo " width="200">
 </p>
+<p align="center">
+<img src="https://public.cells.es/cdn/public/icat/icat-logo.png" alt="icat collaboration logo " width="200">
+</p>
 
 ## Introduction
 
@@ -155,3 +158,4 @@ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Gen
 You should have received a copy of the GNU General Public License along with this program. If not,
 
 see <https://www.gnu.org/licenses/>.
+
