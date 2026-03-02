@@ -1,93 +1,156 @@
-# ICAT test box
+# ICAT‑testbox: Auto‑provisioned ICAT servers for unit and integration testing
 
+The ICAT project provides a metadata catalogue and related components to support experimental data management for
+large-scale facilities, linking all aspects of the research lifecycle from proposal through to data and articles
+publication.
 
+More information on ICAT can be found [here](https://icatproject.org/).
+<p align="center">
+<img src="https://public.cells.es/cdn/public/icat/icat-logo.png" alt="icat collaboration logo" width="200">
+</p>
 
-## Getting started
+## Introduction
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+ICAT-testbox provides auto-provisioned ICAT servers on-demand, useful for unit and integration testing of components or
+other projects that need to interact with an ICAT instance. Instances can be created easily with a single HTTP request,
+with the option to specify specific versions for the server and authentication components, and the option to preload a
+set of test fixtures onto the database.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Request:
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+```console
+curl -X POST http://localhost:5000/testbox \
+-H "Content-Type: application/json" \
+-d '{
+"icat_version": "6.2.0",
+"authn_db_version": "3.0.0",
+"init_database": true
+}'
 ```
-cd existing_repo
-git remote add origin https://git.cells.es/mis/icat-projects/icat-test-box.git
-git branch -M master
-git push -uf origin master
+
+Response:
+
+```console
+{
+  "provisioner": "icat_testbox_0", 
+  "type": "icat-testbox",
+  "identifier": "u20u151", 
+  "creation_date": "02-03-2026 13:00:18", 
+  "icat_version": "6.2.0", 
+  "authn_db_version": "3.0.0", 
+  "host_port": "50000", 
+  "container_id": "ac6e036a3b245f6f7fd00f399488c3f92325150e6bde0244d036967c4ce45c51", 
+  "container_name": "icat-test-box_u20u151"
+}
 ```
 
-## Integrate with your tools
+## Prerequisites
 
-- [ ] [Set up project integrations](https://git.cells.es/mis/icat-projects/icat-test-box/-/settings/integrations)
+- Docker.
 
-## Collaborate with your team
+## Installing
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Build base Payara image
 
-## Test and Deploy
+```console
+git clone https://github.com/ALBA-Synchrotron/icat-testbox.git
+cd icat-testbox
+docker build -t icat-testbox-payara6:latest -f ./icat-dockerfiles/payara6/Dockerfile_payara6 ./icat-dockerfiles/payara6/
+```
 
-Use the built-in continuous integration in GitLab.
+### Deploy
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```console
+docker run -p 5000:5000 -d --name icat-testbox -it -v /var/run/docker.sock:/var/run/docker.sock icat-testbox:latest
+```
 
-***
+Or mounting the fixtures directory and config file:
 
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```console
+docker run -p 5000:5000 -d --name icat-testbox -it -v /var/run/docker.sock:/var/run/docker.sock -v ./config.json:/app/config.json -v ./fixtures/:/app/fixtures/ icat-testbox:latest
+```
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+The project consists of a simple API built with Flask. Upon starting the application, a mariadb instance (if not
+configured differently) will spin up which will be used as the database for the provisioned ICAT instances.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Instances can be created through a POST request to `/testbox` endpoint. In the request's body, both icat.server and
+authn.server versions can be specified, as well as the option to preload a set of test fixtures onto the database. The
+creation call also creates specific database schemas for the ICAT server and db authentication components.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```console
+curl -X POST http://localhost:5000/testbox \
+-H "Content-Type: application/json" \
+-d '{
+"icat_version": "6.2.0",
+"authn_db_version": "3.0.0",
+"init_database": true
+}'
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+A list of the currently running icat-testbox instances can be retrieved through a GET request to `/testbox` endpoint.
+```console
+curl -X GET http://localhost:5000/testbox
+```
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+A specific instance can be deleted through a DELETE request to `/testbox/<instance_identifier>` endpoint. The instance 
+deletion also deletes the instance's corresponding database schemas.
+```console
+curl -X GET http://localhost:5000/testbox/vje9d6o
+```
+By default, the ephemeral instances have a lifespan of 30 minutes, after which they will be automatically deleted along
+their database schemas. This behavior can be changed by setting the `MAX_INSTANCE_LIFETIME` environment variable or by 
+completely disabling the scheduler by setting `SCHEDULER_ENABLED` to `false`.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+There is also the possibility to require an access token in the 'Authorization' header for all requests, 
+this token can be set in the `ACCESS_TOKEN` environment variable.
+
+> **Notice**: This project is meant to be used for development and testing purposes only, an as-is production deployment 
+> is not recommended.
+
+
+## Configuration and installation details
+
+### Configuration file
+
+Configuration parameters related to the database used by the application, Payara image to use, and the fixtures to
+preload can be set in a `config.json` file. An example of this file can be found in the `config.json.example` file.
+
+### Environment variables
+
+| Name                            | Description                                                         | Default value          |
+|---------------------------------|---------------------------------------------------------------------|------------------------|
+| ``ICAT_TESTBOX_INSTANCE_NAME `` | Testbox provisioner name.                                           | `icat_testbox_0`       |
+| ``CONFIG_FILE_PATH``            | Location of config.json file.                                       | `config.json`          |
+| ``DATABASE_PORT``               | Port for the auto-provisioned MariaDB.                              | `33306`                |
+| ``HOST_DB_NAME``                | Name of the DB host that ICAT will connect to (only if external).   | `host.docker.internal` |
+| ``DEFAULT_DATABASE``            | Database by default for the instances.                              | `mariadb`              |
+| ``DOCKER_SOCKET_PATH``          | Docker's socket path.                                               | `/var/run/docker.sock` |
+| ``CONTAINERS_PORT_RANGE``       | Range of ports than can be used for the provisioned ICAT instances. | `50000-55000`          |
+| ``ACCESS_TOKEN``                | If set, require same token in 'Authorization' header.               |                        |
+| ``SCHEDULER_ENABLED``           | Toggle scheduler.                                                   | `true`                 |
+| ``SCHEDULER_CLEAN_TIMER``       | Instance lifetime expiration cron frequency in minutes.             | `20`                   |
+| ``MAX_INSTANCE_LIFETIME``       | Max instance lifetime in minutes.                                   | `30`                   |
+| ``LOG_LEVEL``                   | Log level for the app.                                              | `INFO`                 |
+
+## Tests
+
+Unit and integration tests are available in the `tests` directory. To run them, execute the following command:
+```
+pytest .
+```
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Copyright (C) 2026 ALBA Synchrotron
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not,
+see <https://www.gnu.org/licenses/>.

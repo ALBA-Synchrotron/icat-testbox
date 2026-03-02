@@ -1,0 +1,13 @@
+FROM payara/server-full:6.2025.3-jdk21
+
+USER root
+
+RUN apt-get update
+RUN apt-get install curl -y
+
+USER payara
+
+COPY ./scripts/payara6_entrypoint.sh /opt/payara/scripts/payara6_entrypoint.sh
+COPY ./scripts/init_1_generate_deploy_commands.sh /opt/payara/scripts/init_1_generate_deploy_commands.sh
+
+ENTRYPOINT ["sh", "-c", "/opt/payara/scripts/payara6_entrypoint.sh"]
