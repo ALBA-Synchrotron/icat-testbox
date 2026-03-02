@@ -67,6 +67,6 @@ def init_scheduler(config: Config) -> BackgroundScheduler | None:
     ret = None
     if config.scheduler_enabled and "PYTEST_CURRENT_TEST" not in os.environ:
         ret = BackgroundScheduler()
-        ret.add_job(clear_expired_testboxes, 'interval', seconds=10, kwargs={"config": config})
+        ret.add_job(clear_expired_testboxes, 'interval', minutes=config.clean_job_timer, kwargs={"config": config})
         ret.start()
     return ret
