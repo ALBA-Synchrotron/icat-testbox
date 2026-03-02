@@ -134,6 +134,13 @@ preload can be set in a `config.json` file. An example of this file can be found
 | ``MAX_INSTANCE_LIFETIME``       | Max instance lifetime in minutes.                                   | `30`                   |
 | ``LOG_LEVEL``                   | Log level for the app.                                              | `INFO`                 |
 
+## Tests
+
+Unit and integration tests are available in the `tests` directory. To run them, execute the following command:
+```
+pytest .
+```
+
 ## License
 
 Copyright (C) 2026 ALBA Synchrotron

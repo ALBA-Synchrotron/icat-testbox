@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from docker.errors import NotFound
 
-import config
+from config import Config
 
 
 @pytest.fixture()
@@ -43,7 +43,7 @@ def app(monkeypatch, docker_client_mock):
         "TESTING": True,
     })
 
-    monkeypatch.setattr(config.Config, "get_docker_client", docker_client_mock)
+    monkeypatch.setattr(Config, "get_docker_client", docker_client_mock)
 
     yield app
 
