@@ -27,9 +27,9 @@ class Config:
 
     def __init__(self) -> None:
         self.icat_testbox_instance_name = os.getenv("ICAT_TESTBOX_INSTANCE_NAME", "icat_testbox_0")
-        self.config_file_path = os.getenv("CONFIG_FILE_PATH", "config.json")
+        self.config_file_path = os.getenv("CONFIG_FILE_PATH", "config.json.example")
         self.database_port = int(os.getenv("DATABASE_PORT", "33306"))
-        self.host_db_name = os.getenv("HOST_DB_NAME", "icat_db")
+        self.host_db_name = os.getenv("HOST_DB_NAME", "host.docker.internal")
         self.default_database = os.getenv("DEFAULT_DATABASE", "mariadb")
         self.docker_socket_path = os.getenv("DOCKER_SOCKET_PATH", "/var/run/docker.sock")
         self.containers_port_range = os.getenv("CONTAINERS_PORT_RANGE", "50000-55000")
