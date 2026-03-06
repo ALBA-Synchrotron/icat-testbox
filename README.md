@@ -90,25 +90,35 @@ curl -X POST http://localhost:5000/testbox \
 ```
 
 A list of the currently running icat-testbox instances can be retrieved through a GET request to `/testbox` endpoint.
+
 ```console
 curl -X GET http://localhost:5000/testbox
 ```
 
-A specific instance can be deleted through a DELETE request to `/testbox/<instance_identifier>` endpoint. The instance 
-deletion also deletes the instance's corresponding database schemas.
+An instance can be reused through a POST request to `/testbox/<instance_identifier>` endpoint. The instance's databases
+are reloaded with the initial fixtures so that the testbox can be used without the overhead of re-provisioning a new
+one.
+
 ```console
 curl -X GET http://localhost:5000/testbox/vje9d6o
 ```
-By default, the ephemeral instances have a lifespan of 30 minutes, after which they will be automatically deleted along
-their database schemas. This behavior can be changed by setting the `MAX_INSTANCE_LIFETIME` environment variable or by 
+
+A specific instance can be deleted through a DELETE request to `/testbox/<instance_identifier>` endpoint. The instance
+deletion also deletes the instance's corresponding database schemas.
+
+```console
+curl -X GET http://localhost:5000/testbox/vje9d6o
+```
+
+By default, the ephemeral instances have a lifespan of 180 minutes, after which they will be automatically deleted along
+their database schemas. This behavior can be changed by setting the `MAX_INSTANCE_LIFETIME` environment variable or by
 completely disabling the scheduler by setting `SCHEDULER_ENABLED` to `false`.
 
-There is also the possibility to require an access token in the 'Authorization' header for all requests, 
+There is also the possibility to require an access token in the 'Authorization' header for all requests,
 this token can be set in the `ACCESS_TOKEN` environment variable.
 
-> **Notice**: This project is meant to be used for development and testing purposes only, an as-is production deployment 
+> **Notice**: This project is meant to be used for development and testing purposes only, an as-is production deployment
 > is not recommended.
-
 
 ## Configuration and installation details
 
@@ -130,13 +140,14 @@ preload can be set in a `config.json` file. An example of this file can be found
 | ``CONTAINERS_PORT_RANGE``       | Range of ports than can be used for the provisioned ICAT instances. | `50000-55000`          |
 | ``ACCESS_TOKEN``                | If set, require same token in 'Authorization' header.               |                        |
 | ``SCHEDULER_ENABLED``           | Toggle scheduler.                                                   | `true`                 |
-| ``SCHEDULER_CLEAN_TIMER``       | Instance lifetime expiration cron frequency in minutes.             | `20`                   |
-| ``MAX_INSTANCE_LIFETIME``       | Max instance lifetime in minutes.                                   | `30`                   |
+| ``SCHEDULER_CLEAN_TIMER``       | Instance lifetime expiration cron frequency in minutes.             | `30`                   |
+| ``MAX_INSTANCE_LIFETIME``       | Max instance lifetime in minutes.                                   | `180`                  |
 | ``LOG_LEVEL``                   | Log level for the app.                                              | `INFO`                 |
 
 ## Tests
 
 Unit and integration tests are available in the `tests` directory. To run them, execute the following command:
+
 ```
 pytest .
 ```

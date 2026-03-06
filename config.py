@@ -36,8 +36,8 @@ class Config:
         self.containers_port_range = os.getenv("CONTAINERS_PORT_RANGE", "50000-55000")
         self.access_token = os.getenv("ACCESS_TOKEN", None)
         self.scheduler_enabled = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"
-        self.clean_job_timer = int(os.getenv("SCHEDULER_CLEAN_TIMER", 1))
-        self.max_instance_lifetime = int(os.getenv("MAX_INSTANCE_LIFETIME", 30))
+        self.clean_job_timer = int(os.getenv("SCHEDULER_CLEAN_TIMER", 30))
+        self.max_instance_lifetime = int(os.getenv("MAX_INSTANCE_LIFETIME", 180))
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
         self.db_container_name = f"{self.icat_testbox_instance_name}_db"
 

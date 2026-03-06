@@ -38,19 +38,26 @@ def provision_new_icat_databases(config: Config, identifier: str, init_database:
         logger.info(f"Databases provisioned successfully, db_names are {dbs_to_create}")
         if init_database:
             logger.info("Initializing database with basic data...")
-            server_fixtures_file = config.get_fixtures_file("icat_server", icat_version)
-            authn_fixtures_file = config.get_fixtures_file("authn_db", authn_db_version)
+            load_database_schema(config, db_container, icat_version, authn_db_version, identifier)
 
-            logger.info(f"Loading server db data from {server_fixtures_file}")
-            load_db_fixtures(config, db_container, server_fixtures_file, icat_server_schema_name)
-
-            logger.info(f"Loading authn db data from {authn_fixtures_file}")
-            load_db_fixtures(config, db_container, authn_fixtures_file, icat_authn_db_schema_name)
         return icat_server_schema_name, icat_authn_db_schema_name
     except NotFound as e:
         sys.exit(f"Database container not found: {e}")
     except APIError as e:
         logger.error(f"Error provisioning database: {e}")
+
+
+def load_database_schema(config: Config, db_container: Container, icat_version: str, authn_db_version: str,
+                         identifier: str) -> None:
+    icat_server_schema_name, icat_authn_db_schema_name = get_db_names(identifier)
+    server_fixtures_file = config.get_fixtures_file("icat_server", icat_version)
+    authn_fixtures_file = config.get_fixtures_file("authn_db", authn_db_version)
+
+    logger.info(f"Loading server db data from {server_fixtures_file}")
+    load_db_fixtures(config, db_container, server_fixtures_file, icat_server_schema_name)
+
+    logger.info(f"Loading authn db data from {authn_fixtures_file}")
+    load_db_fixtures(config, db_container, authn_fixtures_file, icat_authn_db_schema_name)
 
 
 def load_db_fixtures(config: Config, db_container: Container, fixtures_file_path: str, db_schema: str) -> None:

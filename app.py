@@ -7,7 +7,7 @@ from flask import Flask, Response, request, Blueprint
 import messages as msg
 from auth import require_token
 from config import Config
-from containers import provision_new_icat_testbox, get_current_icat_testboxes, delete_icat_testbox
+from containers import provision_new_icat_testbox, get_current_icat_testboxes, delete_icat_testbox, reload_icat_testbox
 from databases import provision_new_icat_databases
 from utils import before_start, random_identifier_generator, init_scheduler
 
@@ -72,6 +72,13 @@ def delete_testbox(identifier: str) -> Response:
         return Response(json.dumps({"msg": msg.ERR_NOT_FOUND}), status=404, content_type="application/json")
     return Response(json.dumps({"msg": msg.TESTBOX_DELETED}), status=200, content_type="application/json")
 
+@bp.route("/testbox/<identifier>", methods=["POST"])
+@require_token(config)
+def reload_testbox(identifier: str) -> Response:
+    reloaded: bool = reload_icat_testbox(config, identifier)
+    if not reloaded:
+        return Response(json.dumps({"msg": msg.ERR_NOT_FOUND}), status=404, content_type="application/json")
+    return Response(json.dumps({"msg": msg.TESTBOX_DB_RELOADED}), status=200, content_type="application/json")
 
 def create_app() -> Flask:
     flask_app: Flask = Flask(__name__)

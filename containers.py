@@ -7,7 +7,7 @@ from docker.errors import APIError, ImageNotFound, ContainerError, NotFound
 from docker.models.containers import Container
 
 from config import Config
-from databases import drop_icat_databases
+from databases import drop_icat_databases, load_db_fixtures, load_database_schema
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -91,6 +91,21 @@ def delete_icat_testbox(config: Config, identifier: str) -> bool:
         drop_icat_databases(config, identifier)
         container: Container = dc.containers.get(f"icat-test-box_{identifier}")
         container.remove(force=True, v=True)
+        return True
+    except (APIError, NotFound) as e:
+        logger.error(f"Error getting current icat testboxes: {e}")
+        return False
+
+
+def reload_icat_testbox(config: Config, identifier: str) -> bool:
+    dc: DockerClient = config.get_docker_client()
+    try:
+        container: Container = dc.containers.get(f"icat-test-box_{identifier}")
+        db_container: Container = dc.containers.get(config.db_container_name)
+        load_database_schema(config, db_container, container.labels.get("icat_version", ""),
+                             container.labels.get("authn_db_version", ""),
+                             identifier)
+
         return True
     except (APIError, NotFound) as e:
         logger.error(f"Error getting current icat testboxes: {e}")

@@ -39,6 +39,11 @@ log.list = SESSION WRITE READ INFO
 !search.engine =
 EOF
 
+echo 'set-hazelcast-configuration --enabled=false' >> /opt/payara/deployments/post_boot_asadmin_commands
+echo 'set server.monitoring-service.monitoring-enabled=false' >> /opt/payara/deployments/post_boot_asadmin_commands
+echo 'set configs.config.server-config.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=50' >> /opt/payara/deployments/post_boot_asadmin_commands
+echo 'set server.ejb-container.property.disable-nonportable-jndi-names=true' >> /opt/payara/deployments/post_boot_asadmin_commands
+
 cd /opt/payara/deployments \
  && mkdir -p tmpwar/WEB-INF/classes \
  && cd tmpwar \
@@ -77,7 +82,6 @@ echo "create-jdbc-connection-pool \
 --ping icat" >> /opt/payara/deployments/post_boot_asadmin_commands
 
 echo 'create-jdbc-resource --connectionpoolid icat jdbc/icat' >> /opt/payara/deployments/post_boot_asadmin_commands
-
 
 # Second pool: authn DB
 PROPS_AUTHN="user=${db_user}:password=${db_password}:url=\"jdbc:${db_type}:://${db_server}:${db_host_port}/${icat_authn_db_schema}\""

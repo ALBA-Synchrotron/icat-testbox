@@ -13,7 +13,7 @@ def docker_container_mock():
     mock_container.id = "asd1234"
     mock_container.name = "testbox1"
     mock_container.status = "running"
-    mock_container.labels = {"identifier": "testbox1"}
+    mock_container.labels = {"identifier": "testbox1", "icat_version": "6.2.0", "authn_db_version": "3.0.0"}
     yield mock_container
 
 

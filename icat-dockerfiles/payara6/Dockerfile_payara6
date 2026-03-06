@@ -1,5 +1,7 @@
 FROM payara/server-full:6.2025.3-jdk21
 
+ENV JAVA_OPTS="-XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xverify:none -Djava.security.egd=file:/dev/./urandom"
+
 USER root
 
 RUN apt-get update
