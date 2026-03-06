@@ -3,6 +3,7 @@ import logging
 import os
 import secrets
 import string
+import time
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from docker import DockerClient
@@ -26,7 +27,7 @@ def before_start(config: Config) -> None:
     dc: DockerClient = config.get_docker_client()
 
     try:
-        db_container = dc.containers.get(f"{config.icat_testbox_instance_name}_db")
+        db_container = dc.containers.get(config.db_container_name)
         logger.info(f"Database container status: {db_container.status}")
         if db_container.status != "running":
             logger.info("Database container is not running. Starting database container...")
@@ -34,9 +35,23 @@ def before_start(config: Config) -> None:
     except NotFound:
         logger.error("Database container not found. Provisioning new database container...")
         db_container = provision_database_container(config)
+
+        count = 0
+        while db_container.status != "running" and count < 10:
+            count += 1
+            time.sleep(2)
+            db_container.reload()
+            logger.info(f"Waiting for database container to start... {count}")
+
         db_username, db_password = config.get_default_db_credentials()
         db_perm_commands: list = db_user_permissions_commands(config.default_database, db_username, db_password)
-        ret, _ = db_container.exec_run(db_perm_commands)
+
+        count, ret = 0, 1
+        while count < 10 and ret != 0:
+            count += 1
+            time.sleep(2)
+            db_container.reload()
+            ret, _ = db_container.exec_run(db_perm_commands)
 
         logger.info(f"Database container status: {db_container.status}")
 
@@ -58,7 +73,7 @@ def clear_expired_testboxes(config: Config) -> None:
 
         if created_at and identifier:
             created_at: datetime.datetime = datetime.datetime.strptime(created_at, "%d-%m-%Y %H:%M:%S")
-            if created_at + datetime.timedelta(minutes=config.max_instance_lifetime) > current_time:
+            if created_at + datetime.timedelta(minutes=config.max_instance_lifetime) < current_time:
                 delete_icat_testbox(config, identifier)
                 logger.info(f"Deleted expired testbox {identifier}")
 

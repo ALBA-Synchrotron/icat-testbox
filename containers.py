@@ -11,6 +11,7 @@ from databases import drop_icat_databases
 
 logger: logging.Logger = logging.getLogger(__name__)
 
+
 def provision_database_container(config: Config) -> Container:
     dc: docker.DockerClient = config.get_docker_client()
     container_config: dict = config.databases[config.default_database]
@@ -24,7 +25,7 @@ def provision_database_container(config: Config) -> Container:
     if not image or not db_port:
         raise ValueError("Invalid database configuration")
     try:
-        return dc.containers.run(image=image, name=f"{config.icat_testbox_instance_name}_db", detach=True,
+        return dc.containers.run(image=image, name=config.db_container_name, detach=True,
                                  ports={f"{db_port}/tcp": host_port}, environment=container_env)
     except (ContainerError, ImageNotFound, APIError) as e:
         raise RuntimeError(f"Failed to provision database container: {e}")
