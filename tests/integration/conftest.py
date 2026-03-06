@@ -1,6 +1,8 @@
 import pytest
+from docker import DockerClient
 
 from config import Config
+from utils import before_start
 
 
 @pytest.fixture()
@@ -14,11 +16,17 @@ def app(monkeypatch):
     yield app
 
 
-
-
 @pytest.fixture(scope="session")
 def config():
-    return Config()
+    config: Config = Config()
+    config.db_container_name = f"{config.db_container_name}_unittest"
+    config.database_port = 33307
+    before_start(config)
+
+    yield config
+
+    dc: DockerClient = config.get_docker_client()
+    dc.containers.get(config.db_container_name).remove(force=True, v=True)
 
 
 @pytest.fixture()

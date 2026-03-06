@@ -16,6 +16,7 @@ class Config:
     config_file_path: str
     database_port: int
     default_database: str
+    db_container_name: str
     host_db_name: str
     docker_socket_path: str
     containers_port_range: str
@@ -27,7 +28,7 @@ class Config:
 
     def __init__(self) -> None:
         self.icat_testbox_instance_name = os.getenv("ICAT_TESTBOX_INSTANCE_NAME", "icat_testbox_0")
-        self.config_file_path = os.getenv("CONFIG_FILE_PATH", "config.json.example")
+        self.config_file_path = os.getenv("CONFIG_FILE_PATH", "/app/config.json")
         self.database_port = int(os.getenv("DATABASE_PORT", "33306"))
         self.host_db_name = os.getenv("HOST_DB_NAME", "host.docker.internal")
         self.default_database = os.getenv("DEFAULT_DATABASE", "mariadb")
@@ -35,9 +36,10 @@ class Config:
         self.containers_port_range = os.getenv("CONTAINERS_PORT_RANGE", "50000-55000")
         self.access_token = os.getenv("ACCESS_TOKEN", None)
         self.scheduler_enabled = os.getenv("SCHEDULER_ENABLED", "true").lower() == "true"
-        self.clean_job_timer = int(os.getenv("SCHEDULER_CLEAN_TIMER", 20))
+        self.clean_job_timer = int(os.getenv("SCHEDULER_CLEAN_TIMER", 1))
         self.max_instance_lifetime = int(os.getenv("MAX_INSTANCE_LIFETIME", 30))
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
+        self.db_container_name = f"{self.icat_testbox_instance_name}_db"
 
         self.__load_config_file()
 

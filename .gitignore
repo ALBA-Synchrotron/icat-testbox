@@ -25,3 +25,4 @@ temp.pdf
 config.yaml
 logs/
 .coverage
+config.json
