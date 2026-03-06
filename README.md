@@ -122,7 +122,7 @@ preload can be set in a `config.json` file. An example of this file can be found
 | Name                            | Description                                                         | Default value          |
 |---------------------------------|---------------------------------------------------------------------|------------------------|
 | ``ICAT_TESTBOX_INSTANCE_NAME `` | Testbox provisioner name.                                           | `icat_testbox_0`       |
-| ``CONFIG_FILE_PATH``            | Location of config.json file.                                       | `config.json`          |
+| ``CONFIG_FILE_PATH``            | Location of config.json file.                                       | `/app/config.json`     |
 | ``DATABASE_PORT``               | Port for the auto-provisioned MariaDB.                              | `33306`                |
 | ``HOST_DB_NAME``                | Name of the DB host that ICAT will connect to (only if external).   | `host.docker.internal` |
 | ``DEFAULT_DATABASE``            | Database by default for the instances.                              | `mariadb`              |
